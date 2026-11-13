@@ -1,0 +1,10 @@
+[package]
+name = "ou-tma-template"
+version = "0.1.0"
+entrypoint = "lib.typ"
+authors = ["Raffaele Cataldo"]
+description = "Generic Open University TMA layout"
+
+[template]
+path = "template"
+entrypoint = "main.typ"
