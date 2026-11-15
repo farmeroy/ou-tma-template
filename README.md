@@ -40,7 +40,29 @@ Or add this to the top of an existing `.typ` file:
   + Part (b)(ii)
 ```
 
-Each `= Question n` heading appears in the page header. Numbered lists use `(a)(i)` numbering.
+Each `= Question n` heading starts a new page and appears in the page header. Numbered lists use `(a)(i)` numbering.
+
+## Word (.docx) output
+
+For courses that want a .docx, convert the same file:
+
+```sh
+ou-docx tma01.typ            # writes tma01.docx
+```
+
+The .docx has the same layout as the PDF: title page, wide margins, a header with the current question and your name, page numbers from the first question, and `(a)(i)` lists. Equations become editable Word equations.
+
+Install it by putting the script on your `PATH`:
+
+```sh
+ln -s ~/Documents/OpenUniversity/ou-tma-template/ou-docx ~/.local/bin/ou-docx
+```
+
+Requires pandoc 3.14 or newer (Ubuntu's package is too old; install the .deb from https://github.com/jgm/pandoc/releases), plus `zip` and `unzip`.
+
+How it works: pandoc reads the Typst file (the template detects pandoc and skips the page layout it can't handle), `docx/reference.docx` supplies the page layout, and `docx/ou.lua` fixes the title page, page breaks and list numbering.
+
+Differences from the PDF: figures aren't numbered or centred, footers show just the page number (not "1 of N"), and the font is Cambria.
 
 ## Options
 
@@ -50,5 +72,5 @@ Each `= Question n` heading appears in the page header. Numbered lists use `(a)(
 | `number` | `""` | TMA number, e.g. `"01"` |
 | `author` | `""` | Your name |
 | `student-id` | `none` | Shown after your name if set |
-| `date` | `datetime.today()` | Date on the title page |
+| `date` | today | Date on the title page, e.g. `datetime(year: 2026, month: 11, day: 14)` |
 | `enum-numbering` | `"(a)(i)"` | Numbering pattern for `+` lists |

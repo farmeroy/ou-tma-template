@@ -4,19 +4,10 @@
 //   #import "@local/ou-tma-template:0.1.0": tma
 //   #show: tma.with(course: "MST368", number: "01", author: "Your Name", student-id: "Z1234567")
 
-#let tma(
-  course: "",
-  number: "",
-  author: "",
-  student-id: none,
-  date: datetime.today(),
-  enum-numbering: "(a)(i)",
-  body,
-) = {
-  let title-text = course + " - TMA " + number
-  let author-name = if student-id == none { author } else { author + " - " + student-id }
-
-  set document(title: title-text, author: author)
+// Full page layout, used when compiling with Typst
+#let pdf-layout(title-text, author-name, date, enum-numbering, body) = {
+  let date = if date == auto { datetime.today() } else { date }
+  set document(title: title-text, author: author-name, date: date)
 
   // Header shows the most recent level-1 heading on or before the current page
   let doc-header = context {
@@ -53,6 +44,43 @@
   )
   counter(page).update(1)
   show heading: set block(below: 2.5em)
+  // Each question starts a new page (as in the docx); weak, so an explicit
+  // #pagebreak() before it doesn't add a blank page
+  show heading.where(level: 1): it => pagebreak(weak: true) + it
 
   body
+}
+
+// pandoc's Typst reader can't do page layout (or here()/datetime.today()),
+// and ignores `set document` inside functions, so give it a plain title
+// block and the content. The date only appears if passed to `tma`.
+#let docx-layout(title-text, author-name, date, body) = {
+  align(center)[
+    #text(size: 24pt, weight: "bold")[#title-text]
+
+    #author-name
+
+    #if date != auto [#date.display()]
+  ]
+  pagebreak()
+  body
+}
+
+#let tma(
+  course: "",
+  number: "",
+  author: "",
+  student-id: none,
+  date: auto,
+  enum-numbering: "(a)(i)",
+  body,
+) = {
+  let title-text = course + " - TMA " + number
+  let author-name = if student-id == none { author } else { author + " - " + student-id }
+
+  if "typst-hs-version" in sys.inputs {
+    docx-layout(title-text, author-name, date, body)
+  } else {
+    pdf-layout(title-text, author-name, date, enum-numbering, body)
+  }
 }

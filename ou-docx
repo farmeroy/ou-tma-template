@@ -1,0 +1,22 @@
+#!/bin/sh
+# Convert a TMA written with ou-tma-template to docx: ou-docx tma.typ [out.docx]
+set -e
+dir=$(dirname "$(readlink -f "$0")")/docx
+in=$(readlink -f "$1")
+out=$(readlink -f "${2:-${1%.typ}.docx}")
+cd "$(dirname "$in")"
+pandoc -f typst "$in" --reference-doc="$dir/reference.docx" --lua-filter="$dir/ou.lua" -o "$out"
+
+# Fill the header's {{TITLE}} and {{AUTHOR}} placeholders from the document
+# properties pandoc wrote (already XML-escaped; escape for sed)
+prop() {
+  unzip -p "$out" docProps/core.xml | sed -n "s|.*<dc:$1>\([^<]*\)</dc:$1>.*|\1|p" | sed 's/[&|\\]/\\&/g'
+}
+title=$(prop title)
+author=$(prop creator)
+tmp=$(mktemp -d)
+unzip -q "$out" word/header1.xml -d "$tmp"
+sed -i "s|{{TITLE}}|$title|; s|{{AUTHOR}}|$author|" "$tmp/word/header1.xml"
+(cd "$tmp" && zip -q "$out" word/header1.xml)
+rm -rf "$tmp"
+echo "wrote $out"
