@@ -62,6 +62,8 @@ Requires pandoc 3.14 or newer (Ubuntu's package is too old; install the .deb fro
 
 How it works: pandoc reads the Typst file (the template detects pandoc and skips the page layout it can't handle), `docx/reference.docx` supplies the page layout, and `docx/ou.lua` fixes the title page, page breaks and list numbering.
 
+To change the Word margins, fonts or styles, edit the values at the top of `docx/make-reference.py` and run `python3 docx/make-reference.py` to rebuild `docx/reference.docx`.
+
 Differences from the PDF: figures aren't numbered or centred, footers show just the page number (not "1 of N"), and the font is Cambria.
 
 ## Options
