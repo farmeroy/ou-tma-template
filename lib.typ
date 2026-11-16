@@ -1,13 +1,19 @@
 // Generic Open University TMA template.
 //
-// Usage:
+// Usage, with the settings in a tma.yaml next to the file:
 //   #import "@local/ou-tma-template:0.1.0": tma
+//   #show: tma.with(..yaml("tma.yaml"))
+//
+// or passed directly:
 //   #show: tma.with(course: "MST368", number: "01", author: "Your Name", student-id: "Z1234567")
+
+// `date` is a datetime, or text (YAML has no date type Typst can display)
+#let show-date(date) = if type(date) == str { date } else { date.display() }
 
 // Full page layout, used when compiling with Typst
 #let pdf-layout(title-text, author-name, date, enum-numbering, body) = {
   let date = if date == auto { datetime.today() } else { date }
-  set document(title: title-text, author: author-name, date: date)
+  set document(title: title-text, author: author-name, date: if type(date) == datetime { date } else { auto })
 
   // Header shows the most recent level-1 heading on or before the current page
   let doc-header = context {
@@ -31,7 +37,7 @@
     #v(1em)
     #text(size: 12pt)[#author-name
     #v(1em)
-    #date.display()]
+    #show-date(date)]
   ]
 
   pagebreak()
@@ -60,7 +66,7 @@
 
     #author-name
 
-    #if date != auto [#date.display()]
+    #if date != auto [#show-date(date)]
   ]
   pagebreak()
   body
@@ -75,8 +81,9 @@
   enum-numbering: "(a)(i)",
   body,
 ) = {
-  let title-text = course + " - TMA " + number
-  let author-name = if student-id == none { author } else { author + " - " + student-id }
+  // str() so unquoted YAML numbers (number: 1) work too
+  let title-text = str(course) + " - TMA " + str(number)
+  let author-name = if student-id == none { author } else { author + " - " + str(student-id) }
 
   if "typst-hs-version" in sys.inputs {
     docx-layout(title-text, author-name, date, body)

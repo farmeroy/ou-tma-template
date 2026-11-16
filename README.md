@@ -16,23 +16,28 @@ ln -s ~/Documents/OpenUniversity/ou-tma-template ~/.local/share/typst/packages/l
 
 ## Use
 
-Start a new TMA from the template:
+Start a new TMA from the template, then fill in `tma01/tma.yaml`:
 
 ```sh
 typst init @local/ou-tma-template:0.1.0 tma01
 ```
 
-Or add this to the top of an existing `.typ` file:
+Or put a `tma.yaml` next to an existing `.typ` file:
+
+```yaml
+course: MST368
+number: "01"
+author: Your Name
+student-id: Z1234567
+# date: 14 November 2026    # defaults to today
+```
+
+and add this to the top of the `.typ` file:
 
 ```typst
 #import "@local/ou-tma-template:0.1.0": tma
 
-#show: tma.with(
-  course: "MST368",
-  number: "01",
-  author: "Your Name",
-  student-id: "Z1234567",
-)
+#show: tma.with(..yaml("tma.yaml"))
 
 = Question 1
 + Part (a)
@@ -41,6 +46,8 @@ Or add this to the top of an existing `.typ` file:
 ```
 
 Each `= Question n` heading starts a new page and appears in the page header. Numbered lists use `(a)(i)` numbering.
+
+You can also skip the YAML file and pass the options directly, e.g. `#show: tma.with(course: "MST368", number: "01", author: "Your Name")`.
 
 ## Word (.docx) output
 
@@ -66,13 +73,25 @@ To change the Word margins, fonts or styles, edit the values at the top of `docx
 
 Differences from the PDF: figures aren't numbered or centred, footers show just the page number (not "1 of N"), and the font is Cambria.
 
+SVG images need `rsvg-convert` (Ubuntu: `librsvg2-bin`) to go into a .docx; PNG and JPEG work as they are.
+
+## Testing
+
+```sh
+test/smoke.sh
+```
+
+Builds `test/fixture.typ` (made-up student and answers) as PDF and .docx, compiles the starter template, and spot-checks the .docx: header text, title page, page breaks and list numbering.
+
 ## Options
+
+These work as keys in `tma.yaml` or as arguments to `tma.with(...)`.
 
 | Option | Default | Description |
 | --- | --- | --- |
-| `course` | `""` | Course code, e.g. `"MST368"` |
-| `number` | `""` | TMA number, e.g. `"01"` |
+| `course` | `""` | Course code, e.g. `MST368` |
+| `number` | `""` | TMA number, e.g. `"01"` (quote it to keep the leading zero) |
 | `author` | `""` | Your name |
-| `student-id` | `none` | Shown after your name if set |
-| `date` | today | Date on the title page, e.g. `datetime(year: 2026, month: 11, day: 14)` |
-| `enum-numbering` | `"(a)(i)"` | Numbering pattern for `+` lists |
+| `student-id` | none | Shown after your name if set |
+| `date` | today | Date on the title page, as text (e.g. `14 November 2026`) or a Typst `datetime` |
+| `enum-numbering` | `"(a)(i)"` | Numbering pattern for `+` lists in the PDF (the .docx always uses `(a)(i)`) |
